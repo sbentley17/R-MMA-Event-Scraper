@@ -1,0 +1,41 @@
+require(rvest)
+require(magrittr)
+install.packages("openxlsx")
+
+Link = ("https://en.wikipedia.org/wiki/UFC_on_ABC:_Till_vs._Vettori")
+UFC <- read_html(Link, as.data.frame=T, stringsAsFactors = TRUE)
+
+UFC %>%  
+  html_nodes("table") %>% 
+  .[[3]] %>% 
+  html_table(fill=T) -> eventdata
+View(eventdata)
+
+#Clean Data Frame
+  eventdata = eventdata[-1,]
+  eventdata = eventdata[,-c(5:8)]
+  colnames(eventdata)[1] = "Weight Class"
+  colnames(eventdata)[2] = "Fighter A"
+  colnames(eventdata)[3] = "  "
+  colnames(eventdata)[4] = "Fighter B"
+  eventdata = eventdata[- grep("Preliminary", eventdata$`Weight Class`),]
+
+#Finding Fighter Data
+
+eventdata$`Fighter A` = gsub(' ', '_', eventdata$`Fighter A`)
+eventdata$`Fighter B` = gsub(' ', '_', eventdata$`Fighter B`)
+
+#For loop to create tables of fighter records
+
+fighterlink = paste("https://en.wikipedia.org/wiki/",row, sep ="")
+UFC2 <- read_html(fighterlink, as.data.frame=T, stringsAsFactors = TRUE)
+UFC2 %>%  
+  html_nodes("table") %>% 
+  .[[3]] %>% 
+  html_table(fill=T) -> fighterRecord
+
+fighterRecord = fighterRecord[,-2]
+fighterRecord = fighterRecord[,-4]
+fighterRecord = fighterRecord[,-c(7:8)]
+fighterRecord = fighterRecord[-c(4:20),]
+
